@@ -1,0 +1,7 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+HOW_IT_WORKS.md
+SUBMISSION_CHECKLIST.md

@@ -1,0 +1,34 @@
+# Runs the crawler automatically every day on GitHub's free runners and saves the
+# updated database back to the repository. Add GROQ_API_KEY (and optionally
+# GEMINI_API_KEY) under: repository Settings -> Secrets and variables -> Actions.
+name: Daily scholarship crawl
+
+on:
+  schedule:
+    - cron: "30 0 * * *"   # 06:00 India time, every day
+  workflow_dispatch:        # also allows a manual run from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  crawl:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: pip install -r requirements.txt
+      - run: python main.py run
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Save the updated database
+        run: |
+          git config user.name "scholarship-crawler"
+          git config user.email "actions@users.noreply.github.com"
+          git add data
+          git commit -m "Daily crawl: update scholarship database" || echo "No changes"
+          git push

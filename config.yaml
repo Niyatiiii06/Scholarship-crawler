@@ -1,0 +1,118 @@
+# Settings for the Scholarship Intelligence Crawler.
+# Seeds are only STARTING POINTS. The crawler follows links, reads sitemaps and
+# runs web searches from here, so most records come from pages not listed below.
+
+seeds:
+  # Official sites to start crawling from
+  official:
+    - https://aicte.gov.in/node/293
+    - https://scholarships.gov.in/
+    - https://www.education.gov.in/
+    - https://www.ugc.gov.in/
+    - https://socialjustice.gov.in/
+    - https://www.minorityaffairs.gov.in/
+    - https://tribal.nic.in/
+    - https://www.dst.gov.in/
+    - https://highereducation.ladakh.gov.in/scholarships
+    - https://nitkkr.ac.in/state-government-scholarships/
+    - https://scholarships.reliancefoundation.org/
+    - https://www.tatatrusts.org/
+    - https://www.sitaramjindalfoundation.org/
+  # Aggregators: used ONLY to learn scholarship names. Their data is never stored.
+  discovery_only:
+    - https://www.buddy4study.com/scholarships
+    - https://www.buddy4study.com/article/state-scholarships
+
+search:
+  enabled: true
+  results_per_query: 8
+  queries:
+    - scholarship for Indian students 2026-27 apply online last date official
+    - state government scholarship 2026-27 notification last date
+    - university merit cum means scholarship 2026-27 eligibility last date
+    - foundation scholarship for Indian students 2026 eligibility apply
+    - CSR scholarship programme 2026-27 India eligibility last date apply
+    - fellowship for Indian students 2026 official notification
+    - scholarship for girls India 2026-27 official application
+    - scholarship for SC ST OBC minority students 2026-27 official portal
+
+crawl:
+  max_pages_per_run: 250         # total pages fetched in one run
+  max_extractions_per_run: 60    # pages sent to the LLM in one run (free-tier friendly)
+  max_extractions_without_deadline: 30   # of those, pages with no deadline date on them
+  max_leads_per_run: 25          # aggregator names resolved to official sites per run
+  max_depth: 2                   # how many links away from a seed we go
+  delay_seconds: 2               # pause between requests to the same site
+  timeout_seconds: 20
+  max_text_chars: 8000          # page text sent to the LLM
+  min_page_score: 5              # how "scholarship-like" a page must be to extract it
+  user_agent: "AtlasScholarshipCrawler/1.0 (student research project; respects robots.txt)"
+
+sources:
+  government_suffixes: [.gov.in, .nic.in, .gov, .gov.uk]
+  university_suffixes: [.ac.in, .edu.in, .edu, .ernet.in, .res.in, .ac.uk]
+  official_portals: [scholarships.gov.in, vidyasaarathi.co.in]
+  # A non-government site with one of these words in its address is treated like an aggregator
+  aggregator_words: [sarkari, yojana, result, jobalert, exam, news, blog, guru, guide, dunia, 4study, career, admission, times, express, today, journal, wiki]
+  aggregators:
+    - buddy4study.com
+    - indiascholarships.in
+    - scholarlify.com
+    - careers360.com
+    - collegedunia.com
+    - shiksha.com
+    - collegedekho.com
+    - internshala.com
+    - scholarshipsinindia.com
+    - vidhyaa.in
+    - getmyuni.com
+    - jagranjosh.com
+    - sarkariresult.com
+    - freejobalert.com
+    - wemakescholars.com
+    - scholarshipforme.com
+    - scholarships.net.in
+    - indiatoday.in
+    - businesstoday.in
+    - timesofindia.indiatimes.com
+    - hindustantimes.com
+    - ndtv.com
+    - thecsrjournal.in
+    - wikipedia.org
+    - youtube.com
+    - facebook.com
+    - instagram.com
+    - linkedin.com
+    - quora.com
+    - reddit.com
+
+# Confidence score: points per evidence check (total = 100). See TECHNICAL_NOTE.md.
+scoring:
+  verified_threshold: 95
+  weights:
+    official_source: 25
+    live_on_source: 10
+    application_url: 10
+    eligibility_evidence: 10
+    deadline_evidence: 10
+    currency: 10
+    no_conflict: 10
+    extraction_consistency: 5
+    traceability: 10
+
+status:
+  expiring_soon_days: 15
+  failures_before_unverifiable: 2
+
+history:
+  snapshot_age_days: 300    # how far back to look in the Internet Archive
+  min_gap_days: 45          # ignore snapshots newer than this
+
+llm:
+  # Tried in this order; a provider is skipped if its key is missing.
+  providers: [groq, gemini, ollama]
+  models:
+    groq: [llama-3.3-70b-versatile, openai/gpt-oss-120b, openai/gpt-oss-20b, llama-3.1-8b-instant]
+    gemini: [gemini-3.5-flash, gemini-3.8-flash, gemini-3.5-flash-lite]
+    ollama: [llama3.1]
+  seconds_between_calls: 4
